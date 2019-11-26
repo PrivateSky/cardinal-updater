@@ -1,0 +1,8 @@
+{
+  "name": "cardinal-updater",
+  "version": "0.1",
+  "devDependencies": {
+    "gulp": "^4.0.2"
+  },
+  "description": "Tool for updating cardinal.js mini-framework"
+}
