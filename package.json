@@ -2,7 +2,6 @@
   "name": "cardinal-updater",
   "version": "0.0.1",
   "description": "Tool for updating cardinal.js mini-framework",
-  "main": "index.js",
   "directories": {
     "lib": "lib"
   },
@@ -19,7 +18,7 @@
     "privatesky"
   ],
   "bin": {
-    "bar": "./lib/cardinal-updater.js"
+    "cardinal-updater": "./lib/cardinal-updater.js"
   },
   "author": "RomSoft",
   "license": "MIT"
