@@ -23,8 +23,6 @@
   "author": "RomSoft",
   "license": "MIT",
   "dependencies": {
-    "del": "^5.1.0",
-    "fs": "0.0.1-security",
     "gulp": "^4.0.2",
     "gulp-git": "^2.10.0",
     "gulp-include": "^2.4.1",
