@@ -5,9 +5,6 @@
   "directories": {
     "lib": "lib"
   },
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
   "repository": {
     "type": "git",
     "url": "Y"
@@ -18,11 +15,12 @@
     "privatesky"
   ],
   "bin": {
-    "cardinal-updater": "./lib/cardinal-updater.js"
+    "cardinal": "./bin/cardinal-updater.js"
   },
   "author": "RomSoft",
   "license": "MIT",
   "dependencies": {
+    "commander": "2.15.1",
     "gulp": "^4.0.2",
     "gulp-git": "^2.10.0",
     "gulp-include": "^2.4.1",
