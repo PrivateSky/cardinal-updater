@@ -7,8 +7,6 @@ const git = require("gulp-git");
 const fs = require("fs");
 const tar = require("tar");
 
-const gitGulpUsage = require('./git-gulp-usage');
-
 let PSKWEBCOMPONENTS_PATH;
 let CARDINAL_PATH;
 
@@ -16,9 +14,7 @@ function init(cb) {
     console.log("Getting the repositories:")
     CARDINAL_PATH = CARDINAL_GITHUB_URL.split("/")[CARDINAL_GITHUB_URL.split("/").length - 1]
     PSKWEBCOMPONENTS_PATH = PSKWEBCOMPONENTS_GITHUB_URL.split("/")[PSKWEBCOMPONENTS_GITHUB_URL.split("/").length - 1]
-    // cb(installComponents);
-    console.log(CARDINAL_PATH);
-    console.log(PSKWEBCOMPONENTS_PATH);
+    cb(installComponents);
 }
 
 async function getWebComponents(cb) {
@@ -26,7 +22,7 @@ async function getWebComponents(cb) {
     if (fs.existsSync("../" + PSKWEBCOMPONENTS_PATH)) {
         cb(getCardinal);
     } else {
-        await git.clone(PSKWEBCOMPONENTS_GITHUB_URL, { args: "../" + PSKWEBCOMPONENTS_PATH }, function (err) {
+        await git.clone(PSKWEBCOMPONENTS_GITHUB_URL, { args: "../" + PSKWEBCOMPONENTS_PATH }, function(err) {
             if (err) console.log(err);
             else {
                 cb(getCardinal)
@@ -39,7 +35,7 @@ function installComponents(cb) {
     console.log("Installing PskWebComponents:")
     let currentDir = process.cwd();
     process.chdir("../" + PSKWEBCOMPONENTS_PATH);
-    run("npm install")().then(function () {
+    run("npm install")().then(function() {
         process.chdir(currentDir);
         cb(installCardinal);
     });
@@ -50,7 +46,7 @@ async function getCardinal(cb) {
     if (fs.existsSync("../" + CARDINAL_PATH)) {
         cb(createBackupFiles);
     } else {
-        await git.clone(CARDINAL_GITHUB_URL, { args: "../" + CARDINAL_PATH }, function (err) {
+        await git.clone(CARDINAL_GITHUB_URL, { args: "../" + CARDINAL_PATH }, function(err) {
             if (err) console.log(err);
             else {
                 cb(createBackupFiles);
@@ -63,7 +59,7 @@ function installCardinal(cb) {
     console.log("Installing Cardinal:")
     let currentDir = process.cwd();
     process.chdir("../" + CARDINAL_PATH);
-    run("npm install")().then(function () {
+    run("npm install")().then(function() {
         process.chdir(currentDir);
         cb(deleteFiles);
     });
@@ -75,8 +71,7 @@ async function createBackupFiles(cb) {
         await tar.c({
             gzip: true,
             file: "backup-files.tgz"
-        }, ["cardinal", "cardinal.js", "themes/default"]
-        ).then(_ => {
+        }, ["cardinal", "cardinal.js", "themes/default"]).then(_ => {
             cb(updateCardinal)
         })
     } catch (err) {
@@ -101,7 +96,7 @@ function RecursionDeletion(folderPath, cb) {
     } else {
         folder = folderPath[0]
     }
-    fs.readdir(folder, function (err, files) {
+    fs.readdir(folder, function(err, files) {
         if (err) {
             console.log(err)
             return err
@@ -133,7 +128,10 @@ function updateCardinal(cb, param) {
     const currentDir = process.cwd();
     process.chdir("../" + CARDINAL_PATH);
     let buildProcess = spawnSync("gulp build", {
-        cwd: process.cwd(), encoding: "utf8", stdio: "inherit", shell: true
+        cwd: process.cwd(),
+        encoding: "utf8",
+        stdio: "inherit",
+        shell: true
     })
     if (buildProcess.status === 0) {
         process.chdir(currentDir);
@@ -146,11 +144,9 @@ function updateCardinal(cb, param) {
 }
 
 function buildError() {
-    tar.x(
-        {
-            file: "backup-files.tgz"
-        }
-    ).then(() => {
+    tar.x({
+        file: "backup-files.tgz"
+    }).then(() => {
         fs.unlinkSync("./backup-files.tgz");
 
     })
