@@ -1,12 +1,9 @@
 const path = require('path');
-const readline = require('readline');
-const gulp = require('gulp');
-const run = require("gulp-run-command").default;
-const git = require("gulp-git");
 
-const utils = require('./utils');
-const fsUsage = require('./fs-usage');
 const constants = require('./constants');
+const { abort, taskRunner, confirm } = require('./utils');
+const { cloneProject, runCommand } = require('./github-project-management');
+const { emptyDirectory, mkdir, deepCopy, cleanDisk } = require('./file-folder-management');
 
 let appPath;
 let program;
@@ -16,16 +13,16 @@ function initApplication(args, _program) {
     appPath = path.resolve(args.appPath);
 
     // Generate application
-    fsUsage.emptyDirectory(appPath, function(empty) {
+    emptyDirectory(appPath, function(empty) {
         if (empty || program.force) {
             _createApplication();
         } else {
-            _confirm('destination is not empty, continue? [y|yes|ok|trye/n|no|false|cancel|exit] ', function(ok) {
+            confirm('destination is not empty, continue? [y|yes|ok|trye/n|no|false|cancel|exit] ', function(ok) {
                 if (ok) {
                     process.stdin.destroy();
                     _createApplication();
                 } else {
-                    utils.abort('Command received', 1);
+                    abort('Aborting process by user command.', 1);
                 }
             })
         }
@@ -37,175 +34,114 @@ module.exports = {
 }
 
 /**
- * Prompt for confirmation on STDOUT/STDIN
- * The test of the user's answer will be true if one of the answers will be provided:
- * y / yes / ok / true
- */
-
-function _confirm(msg, callback) {
-    var rl = readline.createInterface({
-        input: process.stdin,
-        output: process.stdout
-    });
-
-    rl.question(msg, function(input) {
-        rl.close();
-        callback(/^y|yes|ok|true$/i.test(input));
-    });
-}
-
-/**
  * The main function that will orchestrate the creation of the application
  */
 function _createApplication() {
     /**
      * Create the root of the application
      */
-    fsUsage.mkdir(appPath);
+    mkdir(appPath);
 
     /**
      * Copy the baseline structure of the application
      */
     const templateBaselinePath = path.join(__dirname, '..', constants.TEMPLATE_BASELINE_PATH);
-    _deepCopy(`${templateBaselinePath}/**/*`, appPath);
+    deepCopy(`${templateBaselinePath}/**/*`, appPath);
 
     /**
      * Copy the index.html file according to the configuration
      */
     if (program.menu === 'left') {
-        _deepCopy(path.join(__dirname, '..', constants.INDEX_LEFT_MENU), appPath);
+        deepCopy(path.join(__dirname, '..', constants.INDEX_LEFT_MENU), appPath);
     } else {
-        _deepCopy(path.join(__dirname, '..', constants.INDEX_TOP_MENU), appPath);
+        deepCopy(path.join(__dirname, '..', constants.INDEX_TOP_MENU), appPath);
     }
 
     /**
      * Create the other directiories that are needed for the start
      */
     constants.DIRECTORIES_FOR_MKDIR.forEach(__path => {
-        fsUsage.mkdir(path.join(appPath, __path));
+        mkdir(path.join(appPath, __path));
     });
 
     /**
-     * Begin the process of instalation of projects
+     * Run the steps to aquire the final form of the skeleton
      */
-    _clonePskRelease();
+    taskRunner([{
+        method: cloneProject,
+        args: {
+            githubUrl: `${constants.GITHUB_BASE_PATH_LOCAL}/${constants.PSK_RELEASE_MODULE_NAME}`,
+            destinationPath: constants.PSK_RELEASE_MODULE_NAME
+        }
+    }, {
+        method: cloneProject,
+        args: {
+            githubUrl: `${constants.GITHUB_BASE_PATH}/${constants.PSKWEBCOMPONENTS_MODULE_NAME}`,
+            destinationPath: constants.PSKWEBCOMPONENTS_MODULE_NAME
+        }
+    }, {
+        method: cloneProject,
+        args: {
+            githubUrl: `${constants.GITHUB_BASE_PATH}/${constants.CARDINAL_MODULE_NAME}`,
+            destinationPath: constants.CARDINAL_MODULE_NAME
+        }
+    }, {
+        method: runCommand,
+        args: {
+            command: "npm install",
+            destinationPath: constants.PSKWEBCOMPONENTS_MODULE_NAME
+        }
+    }, {
+        method: runCommand,
+        args: {
+            command: "npm install",
+            destinationPath: constants.CARDINAL_MODULE_NAME
+        }
+    }, {
+        method: runCommand,
+        args: {
+            command: "npm run build",
+            destinationPath: constants.CARDINAL_MODULE_NAME
+        }
+    }, {
+        method: copyPskRelease,
+        args: null
+    }, {
+        method: copyCardinalBuild,
+        args: null
+    }, {
+        method: cleanDisk,
+        args: [constants.PSK_RELEASE_MODULE_NAME,
+            constants.CARDINAL_MODULE_NAME,
+            constants.PSKWEBCOMPONENTS_MODULE_NAME
+        ]
+    }]);
 }
 
-async function _clonePskRelease() {
-    console.log('Clone psk-release');
-    await git.clone(`${constants.GITHUB_BASE_PATH_LOCAL}/${constants.PSK_RELEASE_MODULE_NAME}`, { args: constants.PSK_RELEASE_MODULE_NAME },
-        function(err) {
-            if (!err) {
-                _copyPskRelease();
-            } else {
-                utils.abort(err, 1);
-            }
-        });
-}
-
-function _copyPskRelease() {
-    console.log('Copy psk-release files');
-
+/**
+ * This function is copying the files from psk-release to cardinal skeleton
+ * @param {null} __unused 
+ * @param {Function} next - Callback to be called when the execution is done
+ */
+function copyPskRelease(__unused, next) {
     const sourcePath = path.join(appPath, constants.PATH_COPY_RELEASE_FROM);
     const destinationPath = path.join(appPath, constants.PATH_COPY_RELEASE_TO);
 
-    /**
-     * Copy the build files from psk-release
-     */
-    _deepCopy(sourcePath, destinationPath);
+    deepCopy(sourcePath, destinationPath);
 
-    /**
-     * Continue with cloning pskwebcomponents repository
-     */
-    _clonePskWebComp();
+    next();
 }
 
-async function _clonePskWebComp() {
-    console.log('Clone pskwebcomp');
-    await git.clone(`${constants.GITHUB_BASE_PATH}/${constants.PSKWEBCOMPONENTS_MODULE_NAME}`, { args: constants.PSKWEBCOMPONENTS_MODULE_NAME },
-        function(err) {
-            if (!err) {
-                _installPskWebComp();
-            } else {
-                utils.abort(err, 1);
-            }
-        });
-}
-
-function _installPskWebComp() {
-    console.log('Install pskwebcomp');
-    let currentDir = process.cwd();
-    process.chdir(constants.PSKWEBCOMPONENTS_MODULE_NAME);
-    run("npm install")().then(function() {
-        process.chdir(currentDir);
-        _cloneCardinal();
-    });
-}
-
-async function _cloneCardinal() {
-    console.log('Clone cardinal');
-    await git.clone(`${constants.GITHUB_BASE_PATH}/${constants.CARDINAL_MODULE_NAME}`, { args: constants.CARDINAL_MODULE_NAME },
-        function(err) {
-            if (!err) {
-                _installCardinal();
-            } else {
-                utils.abort(err, 1);
-            }
-        });
-}
-
-function _installCardinal() {
-    console.log('Install cardinal');
-    let currentDir = process.cwd();
-    process.chdir(constants.CARDINAL_MODULE_NAME);
-    run("npm install")().then(function() {
-        process.chdir(currentDir);
-        _buildCardinal();
-    });
-}
-
-function _buildCardinal() {
-    console.log('Build cardinal');
-    let currentDir = process.cwd();
-    process.chdir(constants.CARDINAL_MODULE_NAME);
-    run("npm run build")().then(function() {
-        process.chdir(currentDir);
-        _copyCardinalBuild();
-    });
-}
-
-function _copyCardinalBuild() {
-    console.log('Copy cardinal build');
+/**
+ * This function is copying the files from cardinal+pskwebcomponents to cardinal skeleton
+ * @param {null} __unused 
+ * @param {Function} next - Callback to be called when the execution is done
+ */
+function copyCardinalBuild(__unused, next) {
     const sourcePathsCardinal = constants.PATH_COPY_CARDINAL_FROM.map(p => path.join(appPath, p));
     const destinationPathsCardinal = constants.PATH_COPY_CARDINAL_TO.map(p => path.join(appPath, p));
 
-    _deepCopy(sourcePathsCardinal, destinationPathsCardinal, true);
-}
+    deepCopy(sourcePathsCardinal, destinationPathsCardinal, true);
 
-function _deepCopy(arraySourcePaths, destinationPaths, multipleDestinations) {
-    if (multipleDestinations &&
-        arraySourcePaths.length !== destinationPaths.length) {
-        return;
-    }
-
-    let outputBuffer;
-    const options = {
-        allowEmpty: true
-    };
-
-    if (!multipleDestinations) {
-        if (Array.isArray(arraySourcePaths)) {
-            outputBuffer = arraySourcePaths.map((path) => {
-                return gulp.src(path, options).pipe(gulp.dest(destinationPaths));
-            });
-        } else {
-            outputBuffer = gulp.src(arraySourcePaths, options).pipe(gulp.dest(destinationPaths));
-        }
-
-        return outputBuffer;
-    }
-
-    return arraySourcePaths.map((path, index) => {
-        return gulp.src(path, options).pipe(gulp.dest(destinationPaths[index]));
-    });
+    next();
 }

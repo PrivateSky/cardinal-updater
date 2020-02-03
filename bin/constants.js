@@ -36,6 +36,12 @@ const TEMPLATE_BASELINE_PATH = "template/baseline";
 const INDEX_LEFT_MENU = "template/index/left-docked-menu/index.html";
 const INDEX_TOP_MENU = "template/index/top-docked-menu/index.html";
 
+const MESSAGES_TYPES = {
+    ERROR: '\x1b[31m%s\x1b[0m',
+    WARNING: '\x1b[33m%s\x1b[0m',
+    INFO: '\x1b[37m%s\x1b[0m'
+};
+
 module.exports = {
     DEFAULT_SSAPP_NAME,
 
@@ -54,5 +60,7 @@ module.exports = {
 
     TEMPLATE_BASELINE_PATH,
     INDEX_LEFT_MENU,
-    INDEX_TOP_MENU
+    INDEX_TOP_MENU,
+
+    MESSAGES_TYPES
 }
