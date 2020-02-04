@@ -1,5 +1,5 @@
 const readline = require('readline');
-const msgType = require('./constants').MESSAGES_TYPES;
+const { MESSAGES_TYPES } = require('./constants');
 
 /**
  * Displaying one or multiple warning messages
@@ -12,7 +12,7 @@ function info(messages) {
     }
 
     messages.forEach(msg => {
-        _displayMessage(msgType.INFO, `\n[  INFO  ]: ${msg}\n`);
+        _displayMessage(MESSAGES_TYPES.INFO, `\n[  INFO  ]: ${msg}\n`);
     });
 }
 
@@ -27,7 +27,7 @@ function warning(messages) {
     }
 
     messages.forEach(msg => {
-        _displayMessage(msgType.WARNING, `\n[  WARN  ]: ${msg}\n`);
+        _displayMessage(MESSAGES_TYPES.WARNING, `\n[  WARN  ]: ${msg}\n`);
     });
 }
 
@@ -42,7 +42,7 @@ function error(messages) {
     }
 
     messages.forEach(msg => {
-        _displayMessage(msgType.ERROR, `\n[  ERROR  ]: ${msg}\n`);
+        _displayMessage(MESSAGES_TYPES.ERROR, `\n[  ERROR  ]: ${msg}\n`);
     });
 }
 
@@ -60,7 +60,7 @@ function abort(messages, exitCode) {
 
 /**
  * This function takes as argument a list of tasks and it executes them in the given sequence
- * @param {{method:Function, args:any}[]} taskList - The list of the tasks that will be executed
+ * @param {{method: Function, args: any}[]} taskList - The list of the tasks that will be executed
  */
 function taskRunner(taskList = []) {
     if (taskList.length === 0) {
@@ -68,25 +68,26 @@ function taskRunner(taskList = []) {
     }
 
     let self = this;
-
-    let task = taskList[0];
+    let task = taskList.shift();
     info(`Running task ${task.method.name} with arguments ${task.args ? JSON.stringify(task.args) : 'null'}`);
     task.method.call(self, task.args, next);
 
-    taskList.shift();
-
     /**
      * This function will be called by the task when it is finished, so it can go to the next task
+     * @param {boolean} rollback - optional. default value false. Triggers the rollback of the taskRunner
      */
-    function next() {
+    function next(rollback = false) {
+        if (rollback) {
+
+            return;
+        }
+
         info(`Task ${task.method.name} is now completed!`);
 
-        if (taskList.length > 0) {
-            task = taskList[0];
+        if (taskList && taskList.length > 0) {
+            task = taskList.shift();
             info(`Running task ${task.method.name} with arguments ${task.args ? JSON.stringify(task.args) : 'null'}`);
             task.method.call(self, task.args, next);
-
-            taskList.shift();
         } else {
             info("The process is now completed!");
         }

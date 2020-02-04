@@ -3,7 +3,7 @@ const path = require('path');
 const constants = require('./constants');
 const { abort, taskRunner, confirm } = require('./utils');
 const { cloneProject, runCommand } = require('./github-project-management');
-const { emptyDirectory, mkdir, deepCopy, cleanDisk } = require('./file-folder-management');
+const { emptyDirectory, mkdir, deepCopySync, cleanDisk } = require('./file-folder-management');
 
 let appPath;
 let program;
@@ -46,15 +46,15 @@ function _createApplication() {
      * Copy the baseline structure of the application
      */
     const templateBaselinePath = path.join(__dirname, '..', constants.TEMPLATE_BASELINE_PATH);
-    deepCopy(`${templateBaselinePath}/**/*`, appPath);
+    deepCopySync(templateBaselinePath, appPath);
 
     /**
      * Copy the index.html file according to the configuration
      */
     if (program.menu === 'left') {
-        deepCopy(path.join(__dirname, '..', constants.INDEX_LEFT_MENU), appPath);
+        deepCopySync(path.join(__dirname, '..', constants.INDEX_LEFT_MENU), appPath);
     } else {
-        deepCopy(path.join(__dirname, '..', constants.INDEX_TOP_MENU), appPath);
+        deepCopySync(path.join(__dirname, '..', constants.INDEX_TOP_MENU), appPath);
     }
 
     /**
@@ -127,7 +127,7 @@ function copyPskRelease(__unused, next) {
     const sourcePath = path.join(appPath, constants.PATH_COPY_RELEASE_FROM);
     const destinationPath = path.join(appPath, constants.PATH_COPY_RELEASE_TO);
 
-    deepCopy(sourcePath, destinationPath);
+    deepCopySync(sourcePath, destinationPath);
 
     next();
 }
@@ -141,7 +141,7 @@ function copyCardinalBuild(__unused, next) {
     const sourcePathsCardinal = constants.PATH_COPY_CARDINAL_FROM.map(p => path.join(appPath, p));
     const destinationPathsCardinal = constants.PATH_COPY_CARDINAL_TO.map(p => path.join(appPath, p));
 
-    deepCopy(sourcePathsCardinal, destinationPathsCardinal, true);
+    deepCopySync(sourcePathsCardinal, destinationPathsCardinal);
 
     next();
 }

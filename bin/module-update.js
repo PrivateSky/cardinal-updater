@@ -1,15 +1,3 @@
-const PSKWEBCOMPONENTS_GITHUB_URL = "https://github.com/PrivateSky/pskwebcomponents"
-const CARDINAL_GITHUB_URL = "https://github.com/PrivateSky/cardinal"
-
-const run = require("gulp-run-command").default;
-const spawnSync = require("child_process").spawnSync
-const git = require("gulp-git");
-const fs = require("fs");
-const tar = require("tar");
-
-let PSKWEBCOMPONENTS_PATH;
-let CARDINAL_PATH;
-
 function init(cb) {
     console.log("Getting the repositories:")
     CARDINAL_PATH = CARDINAL_GITHUB_URL.split("/")[CARDINAL_GITHUB_URL.split("/").length - 1]
@@ -161,8 +149,83 @@ function copyBuild() {
     }
 }
 
+const path = require('path');
+
+const { taskRunner } = require('./utils');
+const { PATHS_TO_REMOVE_FOR_UPDATE } = require('./constants');
+const { cleanDisk } = require('./file-folder-management');
+
 function updateDependencies() {
-    init(getWebComponents);
+    const appRootPath = path.resolve('./');
+    const cleanDependenciesPath = PATHS_TO_REMOVE_FOR_UPDATE.map(function(_path) {
+        return path.join(appRootPath, _path);
+    });
+
+    /**
+     * Clean the working directory
+     */
+    cleanDisk(cleanDependenciesPath);
+
+    /**
+     * Create the other directiories that are needed for the start
+     */
+    constants.DIRECTORIES_FOR_MKDIR.forEach(__path => {
+        mkdir(path.join(appPath, __path));
+    });
+
+    taskRunner([{
+        method: cleanDisk,
+        args: cleanDependenciesPath
+    }]);
+    // taskRunner([{
+    //     method: cloneProject,
+    //     args: {
+    //         githubUrl: `${constants.GITHUB_BASE_PATH_LOCAL}/${constants.PSK_RELEASE_MODULE_NAME}`,
+    //         destinationPath: constants.PSK_RELEASE_MODULE_NAME
+    //     }
+    // }, {
+    //     method: cloneProject,
+    //     args: {
+    //         githubUrl: `${constants.GITHUB_BASE_PATH}/${constants.PSKWEBCOMPONENTS_MODULE_NAME}`,
+    //         destinationPath: constants.PSKWEBCOMPONENTS_MODULE_NAME
+    //     }
+    // }, {
+    //     method: cloneProject,
+    //     args: {
+    //         githubUrl: `${constants.GITHUB_BASE_PATH}/${constants.CARDINAL_MODULE_NAME}`,
+    //         destinationPath: constants.CARDINAL_MODULE_NAME
+    //     }
+    // }, {
+    //     method: runCommand,
+    //     args: {
+    //         command: "npm install",
+    //         destinationPath: constants.PSKWEBCOMPONENTS_MODULE_NAME
+    //     }
+    // }, {
+    //     method: runCommand,
+    //     args: {
+    //         command: "npm install",
+    //         destinationPath: constants.CARDINAL_MODULE_NAME
+    //     }
+    // }, {
+    //     method: runCommand,
+    //     args: {
+    //         command: "npm run build",
+    //         destinationPath: constants.CARDINAL_MODULE_NAME
+    //     }
+    // }, {
+    //     method: copyPskRelease,
+    //     args: null
+    // }, {
+    //     method: copyCardinalBuild,
+    //     args: null
+    // }, {
+    //     method: cleanDisk,
+    //     args: [constants.PSK_RELEASE_MODULE_NAME,
+    //         constants.CARDINAL_MODULE_NAME,
+    //         constants.PSKWEBCOMPONENTS_MODULE_NAME
+    //     ]
+    // }]);
 }
 
 module.exports = {
