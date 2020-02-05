@@ -1,22 +1,22 @@
 const fs = require('fs');
-const gulp = require('gulp');
+const path = require('path');
 
-const { error, abort, info } = require('./utils');
+const constants = require('./constants');
+const utils = require('./utils');
 
 /**
  * Check if the given directory `dir` is empty.
  *
  * @param {String} dir
- * @param {Function} callback
  */
 
-function emptyDirectory(dir, callback) {
-    fs.readdir(dir, function(err, files) {
-        if (err && err.code !== 'ENOENT') {
-            error(err);
-        }
-        callback(!files || !files.length);
-    });
+function emptyDirectorySync(dir) {
+    if (!fs.existsSync(dir)) {
+        return true;
+    }
+
+    const content = fs.readdirSync(dir);
+    return !content || !content.length;
 }
 
 /**
@@ -24,9 +24,9 @@ function emptyDirectory(dir, callback) {
  * Synchronous operation.
  * @param {String} path 
  */
-function mkdir(path) {
-    if (!fs.existsSync(path)) {
-        fs.mkdirSync(path);
+function mkdirSync(_path) {
+    if (!fs.existsSync(_path)) {
+        fs.mkdirSync(_path);
     }
 }
 
@@ -45,18 +45,18 @@ function deepCopySync(sourcePaths, destinationPaths) {
 
         if (Array.isArray(destinationPaths)) {
             if (sourcePaths.length !== destinationPaths.length) {
-                abort(`The length of arraySourcePaths and destinationPaths must be the same!`, 1);
+                throw new Error(`The length of arraySourcePaths and destinationPaths must be the same!`);
             }
 
-            sourcePaths.forEach(function(path, index) {
-                _recursiveDeepCopySync(path, destinationPaths[index]);
+            sourcePaths.forEach(function(_path, index) {
+                _recursiveDeepCopySync(_path, destinationPaths[index]);
             });
 
             return;
         }
 
-        sourcePaths.forEach(function(path) {
-            _recursiveDeepCopySync(path, destinationPaths);
+        sourcePaths.forEach(function(_path) {
+            _recursiveDeepCopySync(_path, destinationPaths);
         });
 
         return;
@@ -64,6 +64,122 @@ function deepCopySync(sourcePaths, destinationPaths) {
 
     _validatePathList([sourcePaths, destinationPaths]);
     _recursiveDeepCopySync(sourcePaths, destinationPaths);
+}
+
+/**
+ * This function accepts a path or a list of paths that will be deleted from disk
+ * @param {string|string[]} paths - Paths to be deleted from disk
+ */
+function cleanDiskSync(paths, callback) {
+    if (!Array.isArray(paths)) {
+        paths = [paths];
+    }
+
+    paths.forEach(function(_path) {
+        if (!fs.existsSync(_path)) {
+            return;
+        }
+        _removeFolderStructure(_path);
+    });
+
+    callback();
+}
+
+/**
+ * This function is copying the files from psk-release to cardinal skeleton
+ * @param {{appPath:string}} args
+ * @param {Function} next - Callback to be called when the execution is done
+ */
+function copyPskRelease(args, next) {
+    const appPath = args.appPath;
+
+    const sourcePath = path.join(appPath, constants.PATH_COPY_RELEASE_FROM);
+    const destinationPath = path.join(appPath, constants.PATH_COPY_RELEASE_TO);
+
+    try {
+        deepCopySync(sourcePath, destinationPath);
+
+        next();
+    } catch (err) {
+        next(true);
+        utils.abort(err, 1);
+    }
+}
+
+/**
+ * This function is copying the files from cardinal+pskwebcomponents to cardinal skeleton
+ * @param {{appPath:string}} args
+ * @param {Function} next - Callback to be called when the execution is done
+ */
+function copyCardinalBuild(args, next) {
+    const appPath = args.appPath;
+
+    const sourcePathsCardinal = constants.PATH_COPY_CARDINAL_FROM.map(p => path.join(appPath, p));
+    const destinationPathsCardinal = constants.PATH_COPY_CARDINAL_TO.map(p => path.join(appPath, p));
+
+    try {
+        deepCopySync(sourcePathsCardinal, destinationPathsCardinal);
+
+        next();
+    } catch (err) {
+        next(true);
+        utils.abort(err, 1);
+    }
+}
+
+/**
+ * This function archives a series of files and folders
+ * @param {string} backupName - Archive name
+ * @param {string|string[]} backupSourcePaths - Sources tha will be archived
+ */
+function createBackup(backupName, backupSourcePaths) {
+    try {
+        tar.c({
+            gzip: true,
+            file: backupName,
+            sync: true
+        }, backupSourcePaths);
+
+        return true;
+    } catch (err) {
+        utils.abort(err, 1);
+    }
+}
+
+/**
+ * This function extracts all the content from an archive
+ * @param {string} backupName - Archive name
+ * @param {string} appRootPath - Base path of the application
+ */
+function restoreBackup(backupName, appRootPath) {
+    if (!fs.existsSync(backupName)) {
+        return;
+    }
+
+    try {
+        tar.x({
+            cwd: appRootPath,
+            sync: true,
+            file: backupName
+        });
+
+        fs.unlinkSync()
+
+        return true;
+    } catch (err) {
+        utils.abort(err, 1);
+    }
+}
+
+module.exports = {
+    emptyDirectorySync,
+    mkdirSync,
+    deepCopySync,
+    cleanDiskSync,
+    copyCardinalBuild,
+    copyPskRelease,
+    createBackup,
+    restoreBackup
 }
 
 /**
@@ -89,9 +205,7 @@ function _recursiveDeepCopySync(sourcePath, destinationPath) {
 
         if (statSyncSource.isDirectory()) {
             if (!statSyncDest.isDirectory() && !statSyncDest.isFile()) {
-                abort([`Destination path is not a directory or a file!`,
-                    `${sourcePath} -> ${destinationPath}`
-                ], 1);
+                throw new Error(`Destination path is not a directory or a file! \n${sourcePath} -> ${destinationPath}`);
             }
 
             fs.readdirSync(sourcePath).forEach(function(content) {
@@ -100,14 +214,14 @@ function _recursiveDeepCopySync(sourcePath, destinationPath) {
                 statSyncSource = fs.lstatSync(newSource);
 
                 if (statSyncSource.isDirectory()) {
-                    mkdir(newDest);
+                    mkdirSync(newDest);
                 }
 
                 _recursiveDeepCopySync(newSource, newDest);
             });
         }
     } catch (err) {
-        abort(err, 1);
+        utils.abort(err, 1);
     }
 }
 
@@ -120,9 +234,9 @@ function _validatePathList(pathList) {
         pathList = [pathList];
     }
 
-    pathList.forEach(function(path) {
-        if (!fs.existsSync(path)) {
-            abort(`${path} does not exists!`, 1);
+    pathList.forEach(function(_path) {
+        if (!fs.existsSync(_path)) {
+            throw new Error(`${_path} does not exists!`);
         }
     });
 }
@@ -149,7 +263,7 @@ function _recursiveDeletion(sourcePath) {
 
         fs.rmdirSync(sourcePath);
     } catch (err) {
-        abort(err, 1);
+        utils.abort(err, 1);
     }
 }
 
@@ -157,33 +271,10 @@ function _recursiveDeletion(sourcePath) {
  * This function will delete the entire folder structure from the specified path
  * @param {string} path - The path where to delete the folder structure
  */
-function _removeFolderStructure(path) {
-    if (!path || !fs.existsSync(path)) {
-        error(`The specified path does not exists: ${path}`);
+function _removeFolderStructure(_path) {
+    if (!_path || !fs.existsSync(_path)) {
+        utils.warnMsg(`The specified path does not exists: ${_path}`);
     }
 
-    _recursiveDeletion(path);
-}
-
-/**
- * This function accepts a path or a list of paths that will be deleted from disk
- * @param {string|string[]} paths - Paths to be deleted from disk
- */
-function cleanDisk(paths, callback) {
-    if (!Array.isArray(paths)) {
-        paths = [paths];
-    }
-
-    paths.forEach(function(path) {
-        _removeFolderStructure(path);
-    });
-
-    callback();
-}
-
-module.exports = {
-    emptyDirectory,
-    mkdir,
-    deepCopySync,
-    cleanDisk
+    _recursiveDeletion(_path);
 }

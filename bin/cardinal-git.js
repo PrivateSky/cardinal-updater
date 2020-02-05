@@ -1,5 +1,6 @@
 const run = require("gulp-run-command").default;
 const git = require("gulp-git");
+const utils = require('./utils');
 
 /**
  * This function will clone a github project to the destination path, both given as arguments.
@@ -15,7 +16,8 @@ function cloneProject(args, next) {
         if (!err) {
             next();
         } else {
-            abort(err, 1);
+            next(true);
+            utils.abort(err, 1);
         }
     });
 }

@@ -1,5 +1,9 @@
 const readline = require('readline');
-const { MESSAGES_TYPES } = require('./constants');
+const constants = require('./constants');
+const {
+    cleanDiskSync,
+    restoreBackup
+} = require('./cardinal-fs');
 
 /**
  * Displaying one or multiple warning messages
@@ -12,7 +16,7 @@ function info(messages) {
     }
 
     messages.forEach(msg => {
-        _displayMessage(MESSAGES_TYPES.INFO, `\n[  INFO  ]: ${msg}\n`);
+        _displayMessage(constants.MESSAGES_TYPES.INFO, `\n[  INFO  ]: ${msg}\n`);
     });
 }
 
@@ -21,13 +25,13 @@ function info(messages) {
  * 
  * @param {String | Array<String>} messages 
  */
-function warning(messages) {
+function warnMsg(messages) {
     if (!Array.isArray(messages)) {
         messages = [messages];
     }
 
     messages.forEach(msg => {
-        _displayMessage(MESSAGES_TYPES.WARNING, `\n[  WARN  ]: ${msg}\n`);
+        _displayMessage(constants.MESSAGES_TYPES.WARNING, `\n[  WARN  ]: ${msg}\n`);
     });
 }
 
@@ -42,7 +46,7 @@ function error(messages) {
     }
 
     messages.forEach(msg => {
-        _displayMessage(MESSAGES_TYPES.ERROR, `\n[  ERROR  ]: ${msg}\n`);
+        _displayMessage(constants.MESSAGES_TYPES.ERROR, `\n[  ERROR  ]: ${msg}\n`);
     });
 }
 
@@ -76,9 +80,14 @@ function taskRunner(taskList = []) {
      * This function will be called by the task when it is finished, so it can go to the next task
      * @param {boolean} rollback - optional. default value false. Triggers the rollback of the taskRunner
      */
-    function next(rollback = false) {
-        if (rollback) {
-
+    function next(stop = false) {
+        if (stop) {
+            restoreBackup(constants.BACKUP_ARCHIVE_NAME);
+            cleanDiskSync([constants.PSK_RELEASE_MODULE_NAME,
+                constants.CARDINAL_MODULE_NAME,
+                constants.PSKWEBCOMPONENTS_MODULE_NAME,
+                constants.BACKUP_ARCHIVE_NAME
+            ]);
             return;
         }
 
@@ -115,7 +124,7 @@ function confirm(msg, callback) {
 module.exports = {
     info,
     abort,
-    warning,
+    warnMsg,
     error,
     taskRunner,
     confirm
