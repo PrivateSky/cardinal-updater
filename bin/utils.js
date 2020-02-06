@@ -1,3 +1,4 @@
+const path = require('path');
 const readline = require('readline');
 const constants = require('./constants');
 const {
@@ -8,7 +9,7 @@ const {
 /**
  * Displaying one or multiple warning messages
  * 
- * @param {String | Array<String>} messages 
+ * @param {String|String[]} messages 
  */
 function info(messages) {
     if (!Array.isArray(messages)) {
@@ -23,7 +24,7 @@ function info(messages) {
 /**
  * Displaying one or multiple warning messages
  * 
- * @param {String | Array<String>} messages 
+ * @param {String|String[]} messages 
  */
 function warnMsg(messages) {
     if (!Array.isArray(messages)) {
@@ -38,7 +39,7 @@ function warnMsg(messages) {
 /**
  * Display error message
  * 
- * @param {String} message 
+ * @param {String|String[]} message 
  */
 function error(messages) {
     if (!Array.isArray(messages)) {
@@ -53,8 +54,8 @@ function error(messages) {
 /**
  * Closing the program
  * 
- * @param {String} message 
- * @param {Integer} exitCode 
+ * @param {String|String[]} messages
+ * @param {number} exitCode 
  */
 function abort(messages, exitCode) {
     error(messages);

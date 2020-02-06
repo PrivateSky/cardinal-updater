@@ -1,30 +1,28 @@
 {
-  "name": "cardinal-updater",
-  "version": "0.0.1",
-  "description": "Tool for updating cardinal.js mini-framework",
-  "directories": {
-    "lib": "lib"
-  },
-  "repository": {
-    "type": "git",
-    "url": "Y"
-  },
-  "keywords": [
-    "update-cardinal",
-    "cardinal.js",
-    "privatesky"
-  ],
-  "bin": {
-    "cardinal": "./bin/cardinal-updater.js"
-  },
-  "author": "RomSoft",
-  "license": "MIT",
-  "dependencies": {
-    "commander": "2.15.1",
-    "gulp": "^4.0.2",
-    "gulp-git": "^2.10.0",
-    "gulp-include": "^2.4.1",
-    "gulp-run-command": "0.0.10",
-    "tar": "^5.0.5"
-  }
+    "name": "cardinal-updater",
+    "version": "0.0.1",
+    "description": "Tool for updating cardinal.js mini-framework",
+    "directories": {
+        "lib": "lib"
+    },
+    "repository": {
+        "type": "git",
+        "url": "Y"
+    },
+    "keywords": [
+        "update-cardinal",
+        "cardinal.js",
+        "privatesky"
+    ],
+    "bin": {
+        "cardinal": "./bin/cardinal-updater.js"
+    },
+    "author": "RomSoft",
+    "license": "MIT",
+    "dependencies": {
+        "commander": "2.15.1",
+        "gulp-git": "^2.10.0",
+        "gulp-run-command": "0.0.10",
+        "tar": "^5.0.5"
+    }
 }

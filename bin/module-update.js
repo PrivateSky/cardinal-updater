@@ -2,9 +2,11 @@ const path = require('path');
 
 const constants = require('./constants');
 const utils = require('./utils');
+const fs = require('fs');
 const {
     cleanDiskSync,
-    createBackup
+    createBackup,
+    mkdirSync
 } = require('./cardinal-fs');
 const {
     startTaskRunner
@@ -12,6 +14,10 @@ const {
 
 function updateDependencies() {
     const appRootPath = path.resolve('./');
+    const workingDirectory = path.resolve(appRootPath, '..');
+    if (fs.existsSync(workingDirectory)) {
+        process.chdir(workingDirectory);
+    }
 
     utils.warnMsg(`Starting to create backup file ${constants.BACKUP_ARCHIVE_NAME}...`);
     createBackup(constants.BACKUP_ARCHIVE_NAME, constants.PATHS_FOR_BACKUP.map(function(_path) {
@@ -40,7 +46,7 @@ function updateDependencies() {
     /**
      * Run the steps to update all the dependencies
      */
-    startTaskRunner(appRootPath, path.join(appRootPath, '..'));
+    startTaskRunner(appRootPath, workingDirectory);
 }
 
 module.exports = {

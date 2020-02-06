@@ -17,43 +17,37 @@ function startTaskRunner(appPath, workingDirectory = null) {
         method: cloneProject,
         args: {
             githubUrl: `${constants.GITHUB_BASE_PATH_LOCAL}/${constants.PSK_RELEASE_MODULE_NAME}`,
-            destinationPath: workingDirectory ?
-                path.join(workingDirectory, constants.PSK_RELEASE_MODULE_NAME) : constants.PSK_RELEASE_MODULE_NAME
+            destinationPath: constants.PSK_RELEASE_MODULE_NAME
         }
     }, {
         method: cloneProject,
         args: {
             githubUrl: `${constants.GITHUB_BASE_PATH}/${constants.PSKWEBCOMPONENTS_MODULE_NAME}`,
-            destinationPath: workingDirectory ?
-                path.join(workingDirectory, constants.PSKWEBCOMPONENTS_MODULE_NAME) : constants.PSKWEBCOMPONENTS_MODULE_NAME
+            destinationPath: constants.PSKWEBCOMPONENTS_MODULE_NAME
         }
     }, {
         method: cloneProject,
         args: {
             githubUrl: `${constants.GITHUB_BASE_PATH}/${constants.CARDINAL_MODULE_NAME}`,
-            destinationPath: workingDirectory ?
-                path.join(workingDirectory, constants.CARDINAL_MODULE_NAME) : constants.CARDINAL_MODULE_NAME
+            destinationPath: constants.CARDINAL_MODULE_NAME
         }
     }, {
         method: runCommand,
         args: {
             command: "npm install",
-            destinationPath: workingDirectory ?
-                path.join(workingDirectory, constants.PSKWEBCOMPONENTS_MODULE_NAME) : constants.PSKWEBCOMPONENTS_MODULE_NAME
+            destinationPath: constants.PSKWEBCOMPONENTS_MODULE_NAME
         }
     }, {
         method: runCommand,
         args: {
             command: "npm install",
-            destinationPath: workingDirectory ?
-                path.join(workingDirectory, constants.CARDINAL_MODULE_NAME) : constants.CARDINAL_MODULE_NAME
+            destinationPath: constants.CARDINAL_MODULE_NAME
         }
     }, {
         method: runCommand,
         args: {
             command: "npm run build",
-            destinationPath: workingDirectory ?
-                path.join(workingDirectory, constants.CARDINAL_MODULE_NAME) : constants.CARDINAL_MODULE_NAME
+            destinationPath: constants.CARDINAL_MODULE_NAME
         }
     }, {
         method: copyPskRelease,
@@ -71,9 +65,7 @@ function startTaskRunner(appPath, workingDirectory = null) {
             constants.CARDINAL_MODULE_NAME,
             constants.PSKWEBCOMPONENTS_MODULE_NAME,
             constants.BACKUP_ARCHIVE_NAME
-        ].map(function(p) {
-            return workingDirectory ? path.join(workingDirectory, p) : p;
-        })
+        ]
     }]);
 }
 

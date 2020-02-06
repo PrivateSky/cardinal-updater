@@ -17,7 +17,7 @@ function cloneProject(args, next) {
             next();
         } else {
             next(true);
-            utils.abort(err, 1);
+            console.error(err);
         }
     });
 }

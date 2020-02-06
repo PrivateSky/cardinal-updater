@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path = require('path');
+const tar = require('tar');
 
 const constants = require('./constants');
 const utils = require('./utils');
@@ -82,7 +83,9 @@ function cleanDiskSync(paths, callback) {
         _removeFolderStructure(_path);
     });
 
-    callback();
+    if (typeof callback === 'function') {
+        callback();
+    }
 }
 
 /**
@@ -102,7 +105,7 @@ function copyPskRelease(args, next) {
         next();
     } catch (err) {
         next(true);
-        utils.abort(err, 1);
+        console.error(err);
     }
 }
 
@@ -123,7 +126,7 @@ function copyCardinalBuild(args, next) {
         next();
     } catch (err) {
         next(true);
-        utils.abort(err, 1);
+        console.error(err);
     }
 }
 
@@ -133,6 +136,13 @@ function copyCardinalBuild(args, next) {
  * @param {string|string[]} backupSourcePaths - Sources tha will be archived
  */
 function createBackup(backupName, backupSourcePaths) {
+    if (!Array.isArray(backupSourcePaths)) {
+        backupSourcePaths = [backupSourcePaths];
+    }
+    backupSourcePaths = backupSourcePaths.filter(function(_path) {
+        return fs.existsSync(_path);
+    });
+
     try {
         tar.c({
             gzip: true,
@@ -142,7 +152,7 @@ function createBackup(backupName, backupSourcePaths) {
 
         return true;
     } catch (err) {
-        utils.abort(err, 1);
+        console.error(err);
     }
 }
 
@@ -151,14 +161,13 @@ function createBackup(backupName, backupSourcePaths) {
  * @param {string} backupName - Archive name
  * @param {string} appRootPath - Base path of the application
  */
-function restoreBackup(backupName, appRootPath) {
+function restoreBackup(backupName) {
     if (!fs.existsSync(backupName)) {
         return;
     }
 
     try {
         tar.x({
-            cwd: appRootPath,
             sync: true,
             file: backupName
         });
@@ -167,7 +176,7 @@ function restoreBackup(backupName, appRootPath) {
 
         return true;
     } catch (err) {
-        utils.abort(err, 1);
+        console.error(err);
     }
 }
 
@@ -221,7 +230,7 @@ function _recursiveDeepCopySync(sourcePath, destinationPath) {
             });
         }
     } catch (err) {
-        utils.abort(err, 1);
+        console.error(err);
     }
 }
 
@@ -263,7 +272,7 @@ function _recursiveDeletion(sourcePath) {
 
         fs.rmdirSync(sourcePath);
     } catch (err) {
-        utils.abort(err, 1);
+        console.error(err);
     }
 }
 

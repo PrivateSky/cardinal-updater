@@ -30,7 +30,7 @@ function initApplication(args, _program) {
             } else {
                 utils.abort('Aborting process by user command.', 1);
             }
-        })
+        });
     }
 }
 
