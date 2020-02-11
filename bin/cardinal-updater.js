@@ -16,6 +16,8 @@ const callbackModulesLst = {
 _program
     .name("cardinal")
     .version(VERSION, "    --version")
+    .command("init [dir]", "creates an instance of Cardinal.Js withing a directory named [dir]. Default: Cardinal-SSApp")
+    .command('update', "updates an existing instance of Cardinal.Js. This must be executed on the root of the project. E.g: $ path/to/Cardinal-SSApp> cardinal update")
     .option("-m, --menu <type>", "<type> set where to dock the application menu. Possible values (left|top). The default value is left.", "left")
     .parse(process.argv);
 
