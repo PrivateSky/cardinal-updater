@@ -26,7 +26,6 @@ const DIRECTORIES_FOR_mkdirSync = [
 
 const PATH_COPY_CARDINAL_FROM = [
     "../cardinal/release/cardinal",
-    "../cardinal/release/scripts/app.js",
     "../cardinal/release/scripts/controllers",
     "../cardinal/release/themes",
     "../cardinal/release/cardinal.js"
@@ -34,7 +33,6 @@ const PATH_COPY_CARDINAL_FROM = [
 
 const PATH_COPY_CARDINAL_TO = [
     "cardinal",
-    "scripts",
     "scripts/controllers",
     "themes",
     "/",
