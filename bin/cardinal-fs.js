@@ -23,7 +23,7 @@ function emptyDirectorySync(dir) {
 /**
  * Creates a folder if does not exists.
  * Synchronous operation.
- * @param {String} path 
+ * @param {String} path
  */
 function mkdirSync(_path) {
     if (!fs.existsSync(_path)) {
@@ -110,7 +110,7 @@ function copyPskRelease(args, next) {
 }
 
 /**
- * This function is copying the files from cardinal+pskwebcomponents to cardinal skeleton
+ * This function is copying the files from cardinal website + cardinal components to the new cardinal website
  * @param {{appPath:string}} args
  * @param {Function} next - Callback to be called when the execution is done
  */
@@ -193,8 +193,8 @@ module.exports = {
 
 /**
  * This function is making a depp copy of a file or a folder from a source path to a destination path recursively.
- * @param {string} sourcePath - Single source path to copy a file or folder from. 
- * @param {string} destinationPath - Single destination path to copy a file or folder to. 
+ * @param {string} sourcePath - Single source path to copy a file or folder from.
+ * @param {string} destinationPath - Single destination path to copy a file or folder to.
  */
 function _recursiveDeepCopySync(sourcePath, destinationPath) {
     try {
@@ -251,7 +251,7 @@ function _validatePathList(pathList) {
 }
 
 /**
- * Recursive deletion function. If a file is given as parameter, the file is deleted. 
+ * Recursive deletion function. If a file is given as parameter, the file is deleted.
  * If a folder is given, the function will iterate over the content and will delete everything.
  * @param {string} sourcePath - Path to delete
  */

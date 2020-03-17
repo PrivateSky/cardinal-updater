@@ -22,32 +22,32 @@ function startTaskRunner(appPath, workingDirectory = null) {
     }, {
         method: cloneProject,
         args: {
-            githubUrl: `${constants.GITHUB_BASE_PATH}/${constants.PSKWEBCOMPONENTS_MODULE_NAME}`,
-            destinationPath: constants.PSKWEBCOMPONENTS_MODULE_NAME
-        }
-    }, {
-        method: cloneProject,
-        args: {
             githubUrl: `${constants.GITHUB_BASE_PATH}/${constants.CARDINAL_MODULE_NAME}`,
             destinationPath: constants.CARDINAL_MODULE_NAME
         }
     }, {
-        method: runCommand,
+        method: cloneProject,
         args: {
-            command: "npm install",
-            destinationPath: constants.PSKWEBCOMPONENTS_MODULE_NAME
+            githubUrl: `${constants.GITHUB_BASE_PATH}/${constants.CARDINAL_WEBSITE_MODULE_NAME}`,
+            destinationPath: constants.CARDINAL_WEBSITE_MODULE_NAME
         }
     }, {
         method: runCommand,
         args: {
             command: "npm install",
             destinationPath: constants.CARDINAL_MODULE_NAME
+        }
+    }, {
+        method: runCommand,
+        args: {
+            command: "npm install",
+            destinationPath: constants.CARDINAL_WEBSITE_MODULE_NAME
         }
     }, {
         method: runCommand,
         args: {
             command: "npm run build",
-            destinationPath: constants.CARDINAL_MODULE_NAME
+            destinationPath: constants.CARDINAL_WEBSITE_MODULE_NAME
         }
     }, {
         method: copyPskRelease,
@@ -62,8 +62,8 @@ function startTaskRunner(appPath, workingDirectory = null) {
     }, {
         method: cleanDiskSync,
         args: [constants.PSK_RELEASE_MODULE_NAME,
+            constants.CARDINAL_WEBSITE_MODULE_NAME,
             constants.CARDINAL_MODULE_NAME,
-            constants.PSKWEBCOMPONENTS_MODULE_NAME,
             constants.BACKUP_ARCHIVE_NAME
         ]
     }]);

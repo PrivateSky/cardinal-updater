@@ -8,8 +8,8 @@ const {
 
 /**
  * Displaying one or multiple warning messages
- * 
- * @param {String|String[]} messages 
+ *
+ * @param {String|String[]} messages
  */
 function info(messages) {
     if (!Array.isArray(messages)) {
@@ -23,8 +23,8 @@ function info(messages) {
 
 /**
  * Displaying one or multiple warning messages
- * 
- * @param {String|String[]} messages 
+ *
+ * @param {String|String[]} messages
  */
 function warnMsg(messages) {
     if (!Array.isArray(messages)) {
@@ -38,8 +38,8 @@ function warnMsg(messages) {
 
 /**
  * Display error message
- * 
- * @param {String|String[]} message 
+ *
+ * @param {String|String[]} message
  */
 function error(messages) {
     if (!Array.isArray(messages)) {
@@ -53,9 +53,9 @@ function error(messages) {
 
 /**
  * Closing the program
- * 
+ *
  * @param {String|String[]} messages
- * @param {number} exitCode 
+ * @param {number} exitCode
  */
 function abort(messages, exitCode) {
     error(messages);
@@ -85,8 +85,8 @@ function taskRunner(taskList = []) {
         if (stop) {
             restoreBackup(constants.BACKUP_ARCHIVE_NAME);
             cleanDiskSync([constants.PSK_RELEASE_MODULE_NAME,
+                constants.CARDINAL_WEBSITE_MODULE_NAME,
                 constants.CARDINAL_MODULE_NAME,
-                constants.PSKWEBCOMPONENTS_MODULE_NAME,
                 constants.BACKUP_ARCHIVE_NAME
             ]);
             return;
@@ -133,8 +133,8 @@ module.exports = {
 
 /**
  * Function that displays a message with a type
- * @param {string} type 
- * @param {string} message 
+ * @param {string} type
+ * @param {string} message
  */
 function _displayMessage(type, message) {
     console.log(type, message);
