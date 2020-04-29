@@ -285,5 +285,6 @@ function _removeFolderStructure(_path) {
         utils.warnMsg(`The specified path does not exists: ${_path}`);
     }
 
-    _recursiveDeletion(_path);
+    //_recursiveDeletion(_path);
+    fs.rmdirSync(_path, {recursive: true, maxRetries: 10, retryDelay: 1000});
 }
