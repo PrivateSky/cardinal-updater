@@ -202,8 +202,8 @@ function _recursiveDeepCopySync(sourcePath, destinationPath) {
         if (statSyncSource.isFile()) {
             if (fs.existsSync(destinationPath) &&
                 fs.lstatSync(destinationPath).isDirectory()) {
-                filePathSplit = sourcePath.split('\\');
-                destinationPath = `${destinationPath}\\${filePathSplit.pop()}`;
+                let filename = path.basename(sourcePath);
+                destinationPath = path.join(destinationPath,filename);
             }
 
             fs.copyFileSync(sourcePath, destinationPath);
@@ -218,8 +218,8 @@ function _recursiveDeepCopySync(sourcePath, destinationPath) {
             }
 
             fs.readdirSync(sourcePath).forEach(function(content) {
-                const newSource = `${sourcePath}\\${content}`;
-                const newDest = `${destinationPath}\\${content}`;
+                const newSource = path.join(sourcePath,content);
+                const newDest = path.join(destinationPath,content);
                 statSyncSource = fs.lstatSync(newSource);
 
                 if (statSyncSource.isDirectory()) {
@@ -265,7 +265,7 @@ function _recursiveDeletion(sourcePath) {
 
         const content = fs.readdirSync(sourcePath);
         content.forEach(function(contentPath) {
-            const newPath = `${sourcePath}\\${contentPath}`;
+            const newPath = path.join(sourcePath,contentPath);
 
             _recursiveDeletion(newPath);
         });
