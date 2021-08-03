@@ -23,6 +23,6 @@
         "commander": "2.15.1",
         "gulp-git": "^2.10.0",
         "gulp-run-command": "0.0.10",
-        "tar": "^5.0.5"
+        "tar": "^5.0.7"
     }
 }
